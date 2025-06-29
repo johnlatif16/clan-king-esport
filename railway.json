@@ -1,0 +1,11 @@
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@railway/app-node"
+    }
+  ],
+  "volumes": {
+    "data": "./data"
+  }
+}

@@ -13,9 +13,30 @@ const { v4: uuidv4 } = require('uuid');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// تهيئة قاعدة البيانات SQLite
-const dbPath = process.env.NODE_ENV === 'production' ? '/data/database.db' : './database.db';
-const db = new sqlite3.Database(dbPath);
+// دالة لضمان وجود مجلد البيانات
+const ensureDataDir = () => {
+  const dataDir = process.env.NODE_ENV === 'production' 
+    ? path.join(__dirname, 'data') 
+    : path.join(__dirname);
+  
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  return dataDir;
+};
+
+// تهيئة قاعدة البيانات SQLite مع مسار متوافق مع Railway
+const dbPath = process.env.NODE_ENV === 'production' 
+  ? path.join(ensureDataDir(), 'database.db') 
+  : './database.db';
+
+const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+  if (err) {
+    console.error('Error opening database:', err.message);
+    process.exit(1);
+  }
+  console.log('Connected to SQLite database at:', dbPath);
+});
 
 // إنشاء الجداول إذا لم تكن موجودة
 db.serialize(() => {
@@ -103,7 +124,11 @@ const transporter = nodemailer.createTransport({
 // تكوين الجلسات مع SQLite Store
 const SQLiteStore = require('connect-sqlite3')(session);
 const sessionConfig = {
-  store: new SQLiteStore({ db: 'sessions.db', dir: process.env.NODE_ENV === 'production' ? '/data' : '.' }),
+  store: new SQLiteStore({ 
+    db: 'sessions.db', 
+    dir: ensureDataDir(),
+    concurrentDB: true
+  }),
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: true,
@@ -117,9 +142,8 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
-app.use(session(sessionConfig));
-
 // Middleware
+app.use(session(sessionConfig));
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -346,12 +370,10 @@ app.post('/admin/update-inquiry/:id', isAdminAuthenticated, async (req, res) => 
   }
 });
 
-// إرسال رسالة للاعب
 app.post('/admin/send-message', isAdminAuthenticated, async (req, res) => {
   try {
     const { email, message, senderName = "STORE King个ESPORTSツ" } = req.body;
 
-    // إرسال البريد في الخلفية دون انتظار
     transporter.sendMail({
       from: `"${senderName}" <${process.env.SMTP_USER}>`,
       to: email,
@@ -376,7 +398,6 @@ app.post('/admin/send-message', isAdminAuthenticated, async (req, res) => {
   }
 });
 
-// رفع ملف النتيجة
 app.post('/admin/upload-result', isAdminAuthenticated, upload.single('resultFile'), async (req, res) => {
   try {
     const { playerPhone, playerName = 'غير معروف' } = req.body;
@@ -414,7 +435,6 @@ app.post('/admin/upload-result', isAdminAuthenticated, upload.single('resultFile
   }
 });
 
-// حذف نتيجة
 app.delete('/admin/delete-result/:id', isAdminAuthenticated, async (req, res) => {
   try {
     const resultId = req.params.id;
@@ -427,7 +447,6 @@ app.delete('/admin/delete-result/:id', isAdminAuthenticated, async (req, res) =>
           return res.status(404).json({ success: false, message: 'النتيجة غير موجودة' });
         }
 
-        // حذف الملف من الخادم إذا كان موجودًا
         const filePath = path.join(__dirname, 'public', result.fileUrl);
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
@@ -460,12 +479,13 @@ app.get('/admin-login.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin-login.html'));
 });
 
-// Route للصفحة الرئيسية
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// تشغيل الخادم
+// تشغيل الخادم مع معالجة الأخطاء
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+}).on('error', (err) => {
+  console.error('Server error:', err);
 });
