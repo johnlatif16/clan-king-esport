@@ -38,7 +38,7 @@ const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CR
   console.log('Connected to SQLite database at:', dbPath);
 });
 
-// إنشاء الجداول إذا لم تكن موجودة
+// إنشاء الجداول
 db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS bookings (
@@ -78,7 +78,7 @@ db.serialize(() => {
       uploadedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
-
+  
   db.run(`
     CREATE TABLE IF NOT EXISTS admin (
       username TEXT PRIMARY KEY,
@@ -211,6 +211,7 @@ app.get('/api/results/:phone', (req, res) => {
   );
 });
 
+// API للاستفسارات
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, phone, message } = req.body;
@@ -223,37 +224,46 @@ app.post('/api/contact', async (req, res) => {
       function(err) {
         if (err) {
           console.error('Error saving inquiry:', err);
-          return res.status(500).json({ success: false, message: 'حدث خطأ أثناء إرسال الاستفسار' });
+          return res.status(500).json({ 
+            success: false, 
+            message: 'حدث خطأ أثناء إرسال الاستفسار' 
+          });
         }
-        res.json({ success: true, message: 'تم إرسال استفسارك بنجاح' });
+        res.json({ 
+          success: true, 
+          message: 'تم إرسال استفسارك بنجاح' 
+        });
       }
     );
   } catch (error) {
     console.error('Error in contact form:', error);
-    res.status(500).json({ success: false, message: 'حدث خطأ أثناء إرسال الاستفسار' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'حدث خطأ أثناء إرسال الاستفسار' 
+    });
   }
 });
 
 // Routes لوحة التحكم
 app.get('/admin/dashboard', isAdminAuthenticated, (req, res) => {
-  res.sendFile(path.join(__dirname, 'admin', 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'public', 'admin', 'dashboard.html'));
 });
 
 app.get('/admin/data', isAdminAuthenticated, (req, res) => {
   db.serialize(() => {
-    db.all(`SELECT * FROM bookings`, [], (err, bookings) => {
+    db.all(`SELECT * FROM bookings ORDER BY createdAt DESC`, [], (err, bookings) => {
       if (err) {
         console.error('Error fetching bookings:', err);
         return res.status(500).json({ success: false });
       }
 
-      db.all(`SELECT * FROM inquiries`, [], (err, inquiries) => {
+      db.all(`SELECT * FROM inquiries ORDER BY createdAt DESC`, [], (err, inquiries) => {
         if (err) {
           console.error('Error fetching inquiries:', err);
           return res.status(500).json({ success: false });
         }
 
-        db.all(`SELECT * FROM results`, [], (err, results) => {
+        db.all(`SELECT * FROM results ORDER BY uploadedAt DESC`, [], (err, results) => {
           if (err) {
             console.error('Error fetching results:', err);
             return res.status(500).json({ success: false });
@@ -348,6 +358,45 @@ app.post('/admin/update-booking/:id', isAdminAuthenticated, async (req, res) => 
   }
 });
 
+app.delete('/admin/delete-booking/:id', isAdminAuthenticated, async (req, res) => {
+  try {
+    const id = req.params.id;
+    
+    db.get(
+      `SELECT gameVideo FROM bookings WHERE id = ?`,
+      [id],
+      (err, booking) => {
+        if (err || !booking) {
+          return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+        }
+
+        // حذف ملف الفيديو إذا كان موجودًا
+        if (booking.gameVideo) {
+          const filePath = path.join(__dirname, 'public', booking.gameVideo);
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        }
+
+        db.run(
+          `DELETE FROM bookings WHERE id = ?`,
+          [id],
+          function(err) {
+            if (err) {
+              console.error('Error deleting booking:', err);
+              return res.status(500).json({ success: false, message: 'حدث خطأ أثناء حذف الطلب' });
+            }
+            res.json({ success: true, message: 'تم حذف الطلب بنجاح' });
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error('Error deleting booking:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء حذف الطلب' });
+  }
+});
+
 app.post('/admin/update-inquiry/:id', isAdminAuthenticated, async (req, res) => {
   try {
     const id = req.params.id;
@@ -367,6 +416,27 @@ app.post('/admin/update-inquiry/:id', isAdminAuthenticated, async (req, res) => 
   } catch (error) {
     console.error('Error updating inquiry:', error);
     res.status(500).json({ success: false, message: 'حدث خطأ أثناء تحديث الاستفسار' });
+  }
+});
+
+app.delete('/admin/delete-inquiry/:id', isAdminAuthenticated, async (req, res) => {
+  try {
+    const id = req.params.id;
+    
+    db.run(
+      `DELETE FROM inquiries WHERE id = ?`,
+      [id],
+      function(err) {
+        if (err) {
+          console.error('Error deleting inquiry:', err);
+          return res.status(500).json({ success: false, message: 'حدث خطأ أثناء حذف الاستفسار' });
+        }
+        res.json({ success: true, message: 'تم حذف الاستفسار بنجاح' });
+      }
+    );
+  } catch (error) {
+    console.error('Error deleting inquiry:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء حذف الاستفسار' });
   }
 });
 
@@ -410,11 +480,7 @@ app.post('/admin/upload-result', isAdminAuthenticated, upload.single('resultFile
 
     db.run(
       `INSERT INTO results (id, playerPhone, playerName, fileUrl) 
-       VALUES (?, ?, ?, ?)
-       ON CONFLICT(playerPhone) DO UPDATE SET
-         playerName = excluded.playerName,
-         fileUrl = excluded.fileUrl,
-         uploadedAt = CURRENT_TIMESTAMP`,
+       VALUES (?, ?, ?, ?)`,
       [uuidv4(), playerPhone, playerName, fileUrl],
       function(err) {
         if (err) {
@@ -432,6 +498,53 @@ app.post('/admin/upload-result', isAdminAuthenticated, upload.single('resultFile
   } catch (error) {
     console.error('Error uploading result:', error);
     res.status(500).json({ success: false, message: 'حدث خطأ أثناء رفع الملف' });
+  }
+});
+
+app.post('/admin/update-result', isAdminAuthenticated, upload.single('editResultFile'), async (req, res) => {
+  try {
+    const { id, playerPhone, playerName } = req.body;
+    const fileUrl = req.file ? '/uploads/' + req.file.filename : null;
+
+    // الحصول على معلومات النتيجة الحالية
+    db.get(
+      `SELECT fileUrl FROM results WHERE id = ?`,
+      [id],
+      (err, result) => {
+        if (err || !result) {
+          return res.status(404).json({ success: false, message: 'النتيجة غير موجودة' });
+        }
+
+        // إذا تم رفع ملف جديد، احذف الملف القديم
+        if (req.file && result.fileUrl) {
+          const oldFilePath = path.join(__dirname, 'public', result.fileUrl);
+          if (fs.existsSync(oldFilePath)) {
+            fs.unlinkSync(oldFilePath);
+          }
+        }
+
+        const finalFileUrl = fileUrl || result.fileUrl;
+
+        db.run(
+          `UPDATE results SET playerPhone = ?, playerName = ?, fileUrl = ? WHERE id = ?`,
+          [playerPhone, playerName, finalFileUrl, id],
+          function(err) {
+            if (err) {
+              console.error('Error updating result:', err);
+              return res.status(500).json({ success: false, message: 'حدث خطأ أثناء تحديث النتيجة' });
+            }
+            res.json({ 
+              success: true, 
+              message: 'تم تحديث النتيجة بنجاح',
+              fileUrl: finalFileUrl
+            });
+          }
+        );
+      }
+    );
+  } catch (error) {
+    console.error('Error updating result:', error);
+    res.status(500).json({ success: false, message: 'حدث خطأ أثناء تحديث النتيجة' });
   }
 });
 
@@ -476,11 +589,11 @@ app.get('/admin-login.html', (req, res) => {
   if (req.session.adminLoggedIn) {
     return res.redirect('/admin/dashboard');
   }
-  res.sendFile(path.join(__dirname, 'admin-login.html'));
+  res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
 });
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // تشغيل الخادم مع معالجة الأخطاء

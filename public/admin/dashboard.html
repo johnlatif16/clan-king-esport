@@ -19,6 +19,20 @@
     .main-content {
       transition: margin-right 0.3s ease;
     }
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        z-index: 40;
+        height: 100vh;
+      }
+      .sidebar.collapsed {
+        width: 0;
+        overflow: hidden;
+      }
+      .main-content {
+        margin-right: 0 !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900">
@@ -26,10 +40,10 @@
     <!-- الشريط الجانبي -->
     <div id="sidebar" class="sidebar bg-gray-800 text-white w-64 flex-shrink-0">
       <div class="p-4 flex items-center justify-between border-b border-gray-700">
-        <div class="flex items-center">
+        <a href="dashboard.html" class="flex items-center">
           <i class="fas fa-crown text-yellow-400 text-xl"></i>
           <span class="sidebar-text text-xl font-bold mr-2">STORE King</span>
-        </div>
+        </a>
         <button id="toggleSidebar" class="text-gray-400 hover:text-white">
           <i class="fas fa-bars"></i>
         </button>
@@ -81,7 +95,12 @@
     <div class="main-content flex-1 overflow-auto">
       <!-- شريط العنوان -->
       <header class="bg-white dark:bg-gray-800 shadow-sm p-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold text-gray-800 dark:text-white" id="pageTitle">لوحة التحكم</h1>
+        <div class="flex items-center">
+          <button id="mobileToggleSidebar" class="mr-4 p-2 rounded-full bg-gray-200 dark:bg-gray-700 md:hidden">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h1 class="text-xl font-bold text-gray-800 dark:text-white" id="pageTitle">لوحة التحكم</h1>
+        </div>
         <div class="flex items-center space-x-4">
           <button id="toggleDarkMode" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
             <i class="fas fa-moon dark:hidden"></i>
@@ -407,6 +426,40 @@
     </div>
   </div>
 
+  <!-- Modal لحذف الطلب -->
+  <div id="deleteBookingModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-bold text-gray-800 dark:text-white">حذف الطلب</h3>
+      </div>
+      <div class="p-4">
+        <p class="text-gray-700 dark:text-gray-300 mb-4">هل أنت متأكد من حذف هذا الطلب؟</p>
+        <input type="hidden" id="deleteBookingId">
+        <div class="flex justify-end space-x-2">
+          <button type="button" id="cancelDeleteBooking" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">إلغاء</button>
+          <button type="button" id="confirmDeleteBooking" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">حذف</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal لحذف الاستفسار -->
+  <div id="deleteInquiryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-bold text-gray-800 dark:text-white">حذف الاستفسار</h3>
+      </div>
+      <div class="p-4">
+        <p class="text-gray-700 dark:text-gray-300 mb-4">هل أنت متأكد من حذف هذا الاستفسار؟</p>
+        <input type="hidden" id="deleteInquiryId">
+        <div class="flex justify-end space-x-2">
+          <button type="button" id="cancelDeleteInquiry" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">إلغاء</button>
+          <button type="button" id="confirmDeleteInquiry" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">حذف</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
  <script>
   // تحقق من الجلسة عند تحميل الصفحة
   async function checkSession() {
@@ -488,9 +541,13 @@
           </span>
         </td>
         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
-          <button class="edit-booking p-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300" 
+          <button class="edit-booking p-1 text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 mr-2" 
                   data-id="${booking.id}" data-status="${booking.status}" data-notes="${booking.notes || ''}">
             <i class="fas fa-edit"></i>
+          </button>
+          <button class="delete-booking p-1 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 mr-2" 
+                  data-id="${booking.id}">
+            <i class="fas fa-trash"></i>
           </button>
           ${booking.gameVideo ? `
             <a href="${booking.gameVideo}" target="_blank" class="p-1 text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
@@ -515,6 +572,15 @@
         document.getElementById('editBookingNotes').value = notes;
         
         document.getElementById('editBookingModal').classList.remove('hidden');
+      });
+    });
+    
+    // إضافة معالجات الأحداث لأزرار الحذف
+    document.querySelectorAll('.delete-booking').forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-id');
+        document.getElementById('deleteBookingId').value = id;
+        document.getElementById('deleteBookingModal').classList.remove('hidden');
       });
     });
   }
@@ -545,11 +611,15 @@
         </td>
         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">
           ${inquiry.status === 'new' ? `
-            <button class="respond-inquiry p-1 text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300" 
+            <button class="respond-inquiry p-1 text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 mr-2" 
                     data-id="${inquiry.id}">
               <i class="fas fa-reply"></i>
             </button>
           ` : ''}
+          <button class="delete-inquiry p-1 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 mr-2" 
+                  data-id="${inquiry.id}">
+            <i class="fas fa-trash"></i>
+          </button>
           ${inquiry.response ? `
             <button class="view-response p-1 text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300" 
                     data-response="${inquiry.response}">
@@ -576,6 +646,15 @@
       button.addEventListener('click', () => {
         const response = button.getAttribute('data-response');
         alert('الرد:\n\n' + response);
+      });
+    });
+    
+    // إضافة معالجات الأحداث لأزرار حذف الاستفسار
+    document.querySelectorAll('.delete-inquiry').forEach(button => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-id');
+        document.getElementById('deleteInquiryId').value = id;
+        document.getElementById('deleteInquiryModal').classList.remove('hidden');
       });
     });
   }
@@ -704,11 +783,25 @@
   }
   
   // تبديل الشريط الجانبي
-  document.getElementById('toggleSidebar').addEventListener('click', () => {
-    document.getElementById('sidebar').classList.toggle('collapsed');
-    document.querySelector('.main-content').classList.toggle('mr-64');
-    document.querySelector('.main-content').classList.toggle('mr-20');
-  });
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.querySelector('.main-content');
+    
+    sidebar.classList.toggle('collapsed');
+    
+    if (window.innerWidth > 768) {
+      if (sidebar.classList.contains('collapsed')) {
+        mainContent.classList.remove('mr-64');
+        mainContent.classList.add('mr-20');
+      } else {
+        mainContent.classList.remove('mr-20');
+        mainContent.classList.add('mr-64');
+      }
+    }
+  }
+  
+  document.getElementById('toggleSidebar').addEventListener('click', toggleSidebar);
+  document.getElementById('mobileToggleSidebar').addEventListener('click', toggleSidebar);
   
   // تبديل بين الأقسام
   document.querySelectorAll('[data-tab]').forEach(tab => {
@@ -735,7 +828,7 @@
       tab.classList.add('bg-gray-700');
       
       // تحديث عنوان الصفحة
-      document.getElementById('pageTitle').textContent = tab.textContent.trim();
+      document.getElementById('pageTitle').textContent = tab.querySelector('.sidebar-text').textContent.trim();
     });
   });
   
@@ -897,7 +990,7 @@
     }
     
     try {
-      const response = await fetch('/admin/upload-result', {
+      const response = await fetch('/admin/update-result', {
         method: 'POST',
         body: formData
       });
@@ -949,6 +1042,52 @@
     }
   });
   
+  // حذف الطلب
+  document.getElementById('confirmDeleteBooking').addEventListener('click', async () => {
+    const id = document.getElementById('deleteBookingId').value;
+    
+    try {
+      const response = await fetch(`/admin/delete-booking/${id}`, {
+        method: 'DELETE'
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        document.getElementById('deleteBookingModal').classList.add('hidden');
+        showSuccess('تم حذف الطلب بنجاح');
+        loadData();
+      } else {
+        showError(data.message || 'حدث خطأ أثناء حذف الطلب');
+      }
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      showError('حدث خطأ أثناء حذف الطلب');
+    }
+  });
+  
+  // حذف الاستفسار
+  document.getElementById('confirmDeleteInquiry').addEventListener('click', async () => {
+    const id = document.getElementById('deleteInquiryId').value;
+    
+    try {
+      const response = await fetch(`/admin/delete-inquiry/${id}`, {
+        method: 'DELETE'
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        document.getElementById('deleteInquiryModal').classList.add('hidden');
+        showSuccess('تم حذف الاستفسار بنجاح');
+        loadData();
+      } else {
+        showError(data.message || 'حدث خطأ أثناء حذف الاستفسار');
+      }
+    } catch (error) {
+      console.error('Error deleting inquiry:', error);
+      showError('حدث خطأ أثناء حذف الاستفسار');
+    }
+  });
+  
   // إغلاق modal تعديل الطلب
   document.getElementById('closeBookingModal').addEventListener('click', () => {
     document.getElementById('editBookingModal').classList.add('hidden');
@@ -958,6 +1097,11 @@
     document.getElementById('editBookingModal').classList.add('hidden');
   });
   
+  // إغلاق modal حذف الطلب
+  document.getElementById('cancelDeleteBooking').addEventListener('click', () => {
+    document.getElementById('deleteBookingModal').classList.add('hidden');
+  });
+  
   // إغلاق modal الرد على الاستفسار
   document.getElementById('closeInquiryModal').addEventListener('click', () => {
     document.getElementById('respondInquiryModal').classList.add('hidden');
@@ -965,6 +1109,11 @@
   
   document.getElementById('cancelInquiryResponse').addEventListener('click', () => {
     document.getElementById('respondInquiryModal').classList.add('hidden');
+  });
+  
+  // إغلاق modal حذف الاستفسار
+  document.getElementById('cancelDeleteInquiry').addEventListener('click', () => {
+    document.getElementById('deleteInquiryModal').classList.add('hidden');
   });
   
   // إغلاق modal تعديل النتيجة
@@ -998,3 +1147,4 @@
 </script>
 </body>
 </html>
+
