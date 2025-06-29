@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل دخول الادمن</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100&family=Reem+Kufi+Fun:wght@500&display=swap");
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Reem Kufi Fun", sans-serif;
+    }
+
+    :root {
+      --primaryColor: black;
+      --secondColor: #d6d6d6;
+      --backgroundColor: rgb(240, 240, 240);
+      --textColor: black;
+    }
+
+    body.dark-mode {
+      --primaryColor: white;
+      --secondColor: #333;
+      --backgroundColor: #121212;
+      --textColor: white;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: var(--backgroundColor);
+      color: var(--textColor);
+      transition: background-color 0.5s, color 0.5s;
+      direction: rtl;
+    }
+
+    .box {
+      position: relative;
+      width: 380px;
+      height: 420px;
+      background: var(--secondColor);
+      transition: 0.5s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+      box-shadow: 0px 10px 10px rgba(0, 0, 0, 0.192);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .box::before,
+    .box::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 380px;
+      height: 420px;
+      background: linear-gradient(0deg, transparent, var(--primaryColor), var(--primaryColor));
+      transform-origin: bottom right;
+      animation: animate 6s linear infinite;
+    }
+
+    .box::after {
+      animation-delay: -3s;
+    }
+
+    @keyframes animate {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .form {
+      position: absolute;
+      inset: 2px;
+      border-radius: 8px;
+      background: var(--backgroundColor);
+      z-index: 10;
+      padding: 50px 40px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form h2 {
+      color: var(--primaryColor);
+      font-weight: 500;
+      text-align: center;
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+    }
+
+    .inputBox {
+      position: relative;
+      width: 300px;
+      margin-top: 20px;
+    }
+
+    .inputBox input {
+      position: relative;
+      width: 100%;
+      padding: 10px 10px 10px 0;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--textColor);
+      font-size: 1em;
+      letter-spacing: 0.05em;
+      z-index: 10;
+    }
+
+    .inputBox label {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      color: var(--textColor);
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 1em;
+      letter-spacing: 0.05em;
+      transition: 0.5s;
+    }
+
+    .inputBox input:focus~label,
+    .inputBox input:valid~label {
+      top: 0%;
+      font-size: 0.75em;
+      color: var(--primaryColor);
+    }
+
+    .button {
+      margin-top: 40px;
+      width: 100%;
+    }
+
+    .button button {
+      width: 100%;
+      padding: 10px 0;
+      background-color: var(--primaryColor);
+      color: var(--backgroundColor);
+      font-weight: 500;
+      font-size: 1em;
+      border-radius: 5px;
+      cursor: pointer;
+      border: none;
+      transition: 0.3s ease;
+    }
+
+    .button button:hover {
+      background-color: #2f2f2f;
+    }
+
+    .error {
+      margin-top: 15px;
+      color: red;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .darkModeToggle {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--primaryColor);
+      color: var(--backgroundColor);
+      border: none;
+      padding: 6px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    .toggle-password {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .toggle-password label {
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <form id="loginForm" class="form" autocomplete="off">
+      <h2>Login Admin</h2>
+       <div class="inputBox">
+        <input type="text" id="username" name="username" required />
+        <label for="username">Username</label>
+      </div>
+
+      <div class="inputBox">
+        <input type="password" id="password" name="password" required />
+        <label for="password">Password</label>
+      </div>
+
+      <div class="button">
+        <button type="submit" id="submitBtn">Login</button>
+      </div>
+      <div class="toggle-password">
+            <input type="checkbox" id="showPassword" onclick="togglePassword()">
+            <label for="showPassword">Show Password</label>
+                </div>
+      <div class="error" id="errorMsg"></div>
+    </form>
+  </div>
+
+  <button id="darkModeToggle" class="darkModeToggle">🌙</button>
+
+  <script>
+    // تطبيق وضع الألوان المحفوظ
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark-mode');
+    }
+
+    // تفعيل وضع داكن/فاتح
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    darkModeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      darkModeToggle.textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('darkMode', isDark);
+    });
+
+    // إظهار/إخفاء كلمة المرور
+    const showPasswordCheckbox = document.getElementById('showPassword');
+    const passwordInput = document.getElementById('password');
+    
+    showPasswordCheckbox.addEventListener('change', function() {
+      passwordInput.type = this.checked ? 'text' : 'password';
+    });
+
+    // تعامل مع تسجيل الدخول
+    const loginForm = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const submitBtn = document.getElementById('submitBtn');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'جاري تسجيل الدخول <span class="loading"></span>';
+      errorMsg.textContent = '';
+
+      const data = {
+        username: loginForm.username.value.trim(),
+        password: loginForm.password.value.trim()
+      };
+
+      try {
+        const res = await fetch('/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await res.json();
+
+        if (res.ok && result.success) {
+          // التحقق من الجلسة بعد تسجيل الدخول
+          const sessionCheck = await fetch('/admin/check-session');
+          const sessionData = await sessionCheck.json();
+          
+          if (sessionData.loggedIn) {
+            window.location.href = '/admin/dashboard.html';
+          } else {
+            errorMsg.textContent = 'فشل التحقق من الجلسة';
+          }
+        } else {
+          errorMsg.textContent = result.message || 'اسم المستخدم أو كلمة المرور غير صحيحة';
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        errorMsg.textContent = 'تعذر الاتصال بالخادم. يرجى المحاولة لاحقاً';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Login';
+      }
+    });
+  </script>
+</body>
+</html>

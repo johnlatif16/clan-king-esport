@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clan King个ESPORTSツ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  <style>
+    .dark {
+      color-scheme: dark;
+    }
+    .nav-link {
+      color: #a5b4fc;
+      transition: all 0.3s ease;
+      padding: 0.5rem 1rem;
+      display: block;
+    }
+    .nav-link:hover {
+      color: #818cf8;
+      transform: translateY(-2px);
+    }
+    
+    #themeToggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    #themeToggle:hover {
+      transform: scale(1.1);
+    }
+    
+    .mobile-menu {
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .desktop-menu {
+        display: none;
+      }
+      .mobile-menu-button {
+        display: block;
+      }
+      .mobile-menu.active {
+        display: block;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: #1f2937;
+        width: 100%;
+        padding: 1rem;
+        border-top: 1px solid #374151;
+      }
+      .nav-item {
+        margin-bottom: 0.5rem;
+      }
+      .nav-item:last-child {
+        margin-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+  <!-- Header + Navbar -->
+  <header class="bg-gray-900 text-white py-4 fixed w-full top-0 left-0 shadow-lg z-10">
+    <div class="container mx-auto flex justify-between items-center px-6">
+      <a href="#home" class="text-2xl font-bold cursor-pointer hover:text-indigo-400 transition-colors">Clan King个ESPORTSツ</a>
+      
+      <button class="mobile-menu-button p-2 focus:outline-none hidden">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+      
+      <nav class="desktop-menu">
+        <ul class="flex space-x-6">
+          <li><a href="#home" class="nav-link">الصفحة الرئيسية</a></li>
+          <li><a href="#booking" class="nav-link">تقديم الكلان</a></li>
+          <li><a href="#result" class="nav-link">الاستعلام عن النتيجة</a></li>
+          <li><a href="#Our service" class="nav-link">خدماتنا</a></li>
+          <li class="border-t border-gray-700 pt-2 mt-2"><a href="#معلومات_عنّا" class="nav-link">معلومات عنا</a></li>
+          <li><a href="#inquiries" class="nav-link">اتصل بنا</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="mobile-menu">
+      <ul class="px-6 py-2">
+        <li class="nav-item"><a href="#home" class="nav-link">الصفحة الرئيسية</a></li>
+        <li class="nav-item"><a href="#booking" class="nav-link">تقديم الكلان</a></li>
+        <li class="nav-item"><a href="#result" class="nav-link">الاستعلام عن النتيجة</a></li>
+        <li class="nav-item"><a href="#Our service" class="nav-link">خدمتنا</a></li>
+        <li class="nav-item border-t border-gray-700 pt-2 mt-2"><a href="#معلومات_عنّا" class="nav-link">معلومات عنا</a></li>
+        <li class="nav-item"><a href="#inquiries" class="nav-link">اتصل بنا</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <button id="themeToggle" class="px-4 py-2 bg-indigo-600 rounded-full shadow-lg">
+    <span id="themeIcon" class="text-xl">🌙</span>
+  </button>
+
+  <div class="pt-20"></div>
+
+    <section id="home" class="h-screen bg-cover bg-center" style="background-image: url('https://source.unsplash.com/1600x900/?webdesign');">
+        <div class="flex items-center justify-center h-full bg-black bg-opacity-50">
+            <div class="text-center text-white">
+                <h2 class="text-5xl font-bold mb-4">خدمة العملاء Clan King个ESPORTSツ</h2>
+                <p class="text-lg mb-6">إذا كان هناك مشكلة، نحن تحت أمرك.</p>
+                <a href="#Our service" class="bg-indigo-500 hover:bg-indigo-700 text-white py-3 px-6 rounded-lg">خدماتنا</a>
+            </div>
+        </div>
+    </section>
+
+  <div class="py-16"></div>
+
+  <!-- معلومات عنا -->
+<section id="معلومات_عنّا" class="py-20 bg-white dark:bg-gray-800">
+    <div class="container mx-auto text-center px-6">
+      <h2 class="text-4xl font-bold mb-6">معلومات عنا</h2>
+      <p class="text-lg text-gray-600 dark:text-gray-300 mb-4">
+        FAHD(BA7R) الليدر مسؤول عن كل حاجة
+        <br>
+        JOHN(JOHN)مسؤول عن تسجيل الاسكرمات
+        <br>
+      </p>
+    </div>
+</section>
+
+<!-- Services Section -->
+<section id="Our service" class="py-20 bg-white dark:bg-gray-800">
+        <div class="container mx-auto text-center px-6">
+            <h2 class="text-4xl font-bold mb-12">خدمتنا</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white dark:bg-gray-800 p-6 shadow-lg rounded-lg">
+                      <h3 class="text-xl font-semibold mb-4 dark:text-white">الاتصال بنا</h3>
+                      <p class="text-gray-600 dark:text-gray-300">01116679791 (BA7R)فهد</p>
+                      <p class="text-gray-600 dark:text-gray-300">01274445091 (JOHN)جون</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 shadow-lg rounded-lg">
+                    <h3 class="text-xl font-semibold mb-4 dark:text-white">مميزات الكلان</h3>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+                    <p class="text-gray-700 dark:text-gray-300">اسكرمات و بطولات يوميا لو حد بيرانك بنسبورت ليه و بنعمل حلبات للكلان اسبوعيا نساعد الاعضاء الكلان للتطوير في المستوي يوجد موقع ستور شحن ببجي بيع وشراء شعبية</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-6 shadow-lg rounded-lg">
+                    <h3 class="text-xl font-semibold mb-4 dark:text-white">شروط الكلان</h3>
+                    <p class="text-gray-600 dark:text-gray-300">اولا يكون سنك فوق ال16 تكون 40   فريم فما فوق تكون لاعب اسكرمات و عندك خبرة فيهم و كيدي 4 في 150 جيم و تحترم الاعضاء الكلان و لو حد غلط فيك كلم حد من المسؤولين</p>
+                    <br>
+                    <h3 class="text-xl font-semibold mb-4 dark:text-white">(BA7R-JOHN)</h3>
+                </div>
+                  </section>
+
+  <div class="py-16"></div>
+
+<section id="Our service" class="py-20 bg-white dark:bg-gray-800">
+        <div class="container mx-auto text-center px-6">
+            <h2 class="text-4xl font-bold mb-12">المواقع الخاصة ب كلان "STORE King个ESPORTSツ"</h2>
+                <div class="bg-white dark:bg-gray-800 p-6 shadow-lg rounded-lg">
+                    <h3 class="text-xl font-semibold mb-4 dark:text-white">الاستور</h3>
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+                    <p class="text-gray-700 dark:text-gray-300"><a href="https://johnlatif14.github.io/UC-King-ESPORTS/">موقع الاستور</a></p>
+                    </div>
+                  </section>
+
+    <div class="py-16"></div>
+<!-- الحجز -->
+<section id="booking" class="py-20 bg-white dark:bg-gray-800">
+  <div class="container mx-auto px-6 max-w-lg">
+    <h2 class="text-4xl font-bold mb-6 text-center">تقديم الكلان</h2>
+    <form id="bookingForm" class="bg-gray-100 dark:bg-gray-700 p-6 rounded-lg shadow-md" enctype="multipart/form-data">
+      <label class="block mb-2 font-semibold">الاسم:</label>
+      <input type="text" id="bName" class="w-full mb-4 p-2 border rounded bg-white dark:bg-gray-600 text-gray-800 dark:text-white" required>
+      
+      <label class="block mb-2 font-semibold">البريد الإلكتروني:</label>
+      <input type="email" id="bEmail" class="w-full mb-4 p-2 border rounded bg-white dark:bg-gray-600 text-gray-800 dark:text-white" required>
+      
+      <label class="block mb-2 font-semibold">رقم التليفون:</label>
+      <input type="tel" id="bPhone" class="w-full mb-4 p-2 border rounded bg-white dark:bg-gray-600 text-gray-800 dark:text-white" required>
+      
+      <label class="block mb-2 font-semibold">الفريمات:</label>
+      <select id="bDuration" class="w-full mb-4 p-2 border rounded bg-white dark:bg-gray-600 text-gray-800 dark:text-white" required>
+        <option value="اختر">اختر</option>
+        <option value="30">30</option>
+        <option value="40">40</option>
+        <option value="60">60</option>
+        <option value="90">90</option>
+        <option value="120">120</option>
+      </select>
+      
+      <label class="block mb-2 font-semibold">السن:</label>
+      <input type="text" id="bAge" class="w-full mb-4 p-2 border rounded bg-white dark:bg-gray-600 text-gray-800 dark:text-white" placeholder="أدخل سن اللاعب" required>
+      
+      <label class="block mb-2 font-semibold">رفع فيديو اللعب (حد أقصى 2 دقيقة):</label>
+      <div class="mb-4 p-4 border-2 border-dashed border-gray-300 dark:border-gray-500 rounded-lg">
+        <input type="file" id="bGameVideo" name="bGameVideo" accept="video/*" class="w-full" required>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">يرجى رفع فيديو لا يتجاوز دقيقتين يظهر مهاراتك في اللعب</p>
+      </div>
+      
+      <button type="submit" class="bg-indigo-500 hover:bg-indigo-700 text-white py-3 px-6 rounded w-full">احجز الآن</button>
+    </form>
+    <p id="bookingResponse" class="text-green-600 dark:text-green-400 font-bold mt-4"></p>
+  </div>
+</section>
+
+  <div class="py-16"></div>
+
+<!-- الاستعلام عن النتيجة -->
+<section id="result" class="py-20 bg-gray-100 dark:bg-gray-700">
+  <div class="container mx-auto px-6 max-w-lg">
+    <h2 class="text-4xl font-bold mb-6 text-center">استعلم عن نتيجة التقديم</h2>
+    <form id="inquiryForm" class="bg-white dark:bg-gray-600 p-6 rounded-lg shadow-md">
+      <label class="block mb-2 font-semibold">أدخل رقم التليفون:</label>
+      <input type="tel" id="iPhone" class="w-full mb-4 p-2 border rounded bg-white dark:bg-gray-500 text-gray-800 dark:text-white" required>
+      <button type="submit" class="bg-green-500 hover:bg-green-700 text-white py-3 px-6 rounded w-full">ابحث</button>
+    </form>
+    <div id="inquiryResponse" class="mt-4 bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-semibold">خيارات النتيجة</h3>
+        <button id="closeResult" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="resultOptions" class="flex flex-col space-y-4">
+        <button id="downloadResult" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+          تحميل النتيجة
+        </button>
+        <button id="viewResult" class="bg-indigo-500 hover:bg-indigo-700 text-white py-2 px-4 rounded flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+          </svg>
+          عرض النتيجة
+        </button>
+      </div>
+      <div id="resultViewer" class="mt-4 hidden">
+        <div id="loadingSpinner" class="flex justify-center items-center py-8">
+          <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        </div>
+        <iframe id="resultFrame" src="" class="w-full h-96 rounded border border-gray-200 dark:border-gray-600 hidden"></iframe>
+        <img id="resultImage" src="" alt="النتيجة" class="w-full h-auto rounded border border-gray-200 dark:border-gray-600 hidden">
+      </div>
+    </div>
+  </div>
+</section>
+
+  <div class="py-16"></div>
+
+   <!-- قسم التواصل -->
+  <section id="inquiries" class="py-20">
+    <div class="container mx-auto text-center px-6 max-w-lg">
+      <h2 class="text-4xl font-bold mb-6">لو في استفسار!</h2>
+      
+      <form id="contactForm" class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md">
+        <label for="cName" class="block mb-2 font-semibold">الاسم:</label>
+        <input type="text" id="cName" name="name" class="w-full mb-4 p-2 border rounded bg-white dark:bg-gray-600 text-gray-800 dark:text-white" required>
+
+        <label for="cEmail" class="block mb-2 font-semibold">البريد الإلكتروني:</label>
+        <input type="email" id="cEmail" name="email" class="w-full mb-4 p-2 border rounded bg-white dark:bg-gray-600 text-gray-800 dark:text-white" required>
+
+        <label for="cPhone" class="block mb-2 font-semibold">رقم التليفون:</label>
+        <input type="tel" id="cPhone" name="phone" class="w-full mb-4 p-2 border rounded bg-white dark:bg-gray-600 text-gray-800 dark:text-white" required>
+
+        <label for="cMessage" class="block mb-2 font-semibold">تفاصيل الرسالة:</label>
+        <textarea id="cMessage" name="message" class="w-full mb-4 p-2 border rounded bg-white dark:bg-gray-600 text-gray-800 dark:text-white" rows="4" required></textarea>
+
+        <div id="contactResponse" class="mb-4 text-sm"></div>
+
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-800 text-white py-3 px-6 rounded w-full">إرسال</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="py-16"></div>
+
+  <footer class="bg-gray-900 text-white py-6">
+    <div class="container mx-auto text-center">
+      <p>&copy; © 2025 Clan Trip个ESPORTS. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // معالجة نموذج الحجز
+    const bookingForm = document.getElementById('bookingForm');
+    const bookingResponse = document.getElementById('bookingResponse');
+
+    bookingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData();
+      formData.append('bName', document.getElementById('bName').value);
+      formData.append('bEmail', document.getElementById('bEmail').value);
+      formData.append('bPhone', document.getElementById('bPhone').value);
+      formData.append('bDuration', document.getElementById('bDuration').value);
+      formData.append('bAge', document.getElementById('bAge').value);
+      
+      const fileInput = document.getElementById('bGameVideo');
+      if (fileInput.files[0]) {
+        formData.append('bGameVideo', fileInput.files[0]);
+      }
+
+      try {
+        const res = await fetch('/api/booking', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          bookingResponse.textContent = data.message;
+          bookingResponse.classList.remove('text-red-600');
+          bookingResponse.classList.add('text-green-600');
+          bookingForm.reset();
+        } else {
+          bookingResponse.textContent = data.message || 'حدث خطأ أثناء الحجز';
+          bookingResponse.classList.remove('text-green-600');
+          bookingResponse.classList.add('text-red-600');
+        }
+      } catch (error) {
+        bookingResponse.textContent = 'تعذر الاتصال بالخادم. حاول مرة أخرى.';
+        bookingResponse.classList.remove('text-green-600');
+        bookingResponse.classList.add('text-red-600');
+      }
+    });
+
+    // معالجة نموذج الاستعلام عن النتيجة
+    const inquiryForm = document.getElementById('inquiryForm');
+    const inquiryResponse = document.getElementById('inquiryResponse');
+    const resultOptions = document.getElementById('resultOptions');
+    const resultViewer = document.getElementById('resultViewer');
+    const resultFrame = document.getElementById('resultFrame');
+    const resultImage = document.getElementById('resultImage');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const downloadResult = document.getElementById('downloadResult');
+    const viewResult = document.getElementById('viewResult');
+    const closeResult = document.getElementById('closeResult');
+
+    let currentResult = null;
+
+    inquiryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById('iPhone').value.trim();
+
+      try {
+        inquiryResponse.classList.remove('hidden');
+        resultOptions.classList.add('hidden');
+        resultViewer.classList.remove('hidden');
+        loadingSpinner.classList.remove('hidden');
+        resultFrame.classList.add('hidden');
+        resultImage.classList.add('hidden');
+
+        const response = await fetch(`/api/results/${phone}`);
+        const data = await response.json();
+
+        if (data.success && data.results.length > 0) {
+          currentResult = data.results[0];
+          resultOptions.classList.remove('hidden');
+          resultViewer.classList.add('hidden');
+        } else {
+          showError(data.message || 'لا توجد نتائج لهذا الرقم');
+        }
+      } catch (error) {
+        showError('تعذر الاتصال بالخادم. حاول مرة أخرى.');
+      }
+    });
+
+    // تحميل النتيجة
+    downloadResult.addEventListener('click', () => {
+      if (currentResult && currentResult.fileUrl) {
+        const a = document.createElement('a');
+        a.href = currentResult.fileUrl;
+        a.download = 'نتيجة-Clan King个ESPORTSツ.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    });
+
+    // عرض النتيجة
+    viewResult.addEventListener('click', async () => {
+      if (!currentResult) return;
+
+      resultOptions.classList.add('hidden');
+      resultViewer.classList.remove('hidden');
+      loadingSpinner.classList.remove('hidden');
+      resultFrame.classList.add('hidden');
+      resultImage.classList.add('hidden');
+
+      try {
+        setTimeout(() => {
+          loadingSpinner.classList.add('hidden');
+          
+          if (currentResult.fileUrl.endsWith('.pdf')) {
+            resultFrame.src = currentResult.fileUrl;
+            resultFrame.classList.remove('hidden');
+          } else {
+            resultImage.src = currentResult.fileUrl;
+            resultImage.classList.remove('hidden');
+          }
+        }, 500);
+      } catch (error) {
+        showError('تعذر عرض النتيجة. يرجى تحميلها بدلاً من ذلك.');
+      }
+    });
+
+    function showError(message) {
+      resultViewer.innerHTML = `
+        <div class="text-center py-4 text-red-500 dark:text-red-400">
+          ${message}
+        </div>
+      `;
+      loadingSpinner.classList.add('hidden');
+    }
+
+    // إغلاق عرض النتيجة
+    closeResult.addEventListener('click', () => {
+      inquiryResponse.classList.add('hidden');
+      resultViewer.classList.add('hidden');
+      resultOptions.classList.remove('hidden');
+    });
+
+    // معالجة نموذج الاتصال
+    document.getElementById('contactForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('cName').value.trim();
+      const email = document.getElementById('cEmail').value.trim();
+      const phone = document.getElementById('cPhone').value.trim();
+      const message = document.getElementById('cMessage').value.trim();
+
+      if (!name || !email || !phone || !message) {
+        alert('من فضلك املا كل الحقول');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name, email, phone, message })
+        });
+
+        const data = await response.json();
+        
+        const responseDiv = document.getElementById('contactResponse');
+        if (data.success) {
+          responseDiv.innerHTML = `
+            <div class="bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded">
+              ${data.message}
+            </div>
+          `;
+          document.getElementById('contactForm').reset();
+        } else {
+          responseDiv.innerHTML = `
+            <div class="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded">
+              ${data.message || 'حدث خطأ أثناء الإرسال'}
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        const responseDiv = document.getElementById('contactResponse');
+        responseDiv.innerHTML = `
+          <div class="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded">
+            حدث خطأ أثناء الإرسال. حاول مرة أخرى.
+          </div>
+        `;
+      }
+    });
+
+    // تبديل الوضع الداكن/الفاتح
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.documentElement.classList.add('dark');
+      themeIcon.textContent = '☀️';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('darkMode', isDark);
+      themeIcon.textContent = isDark ? '☀️' : '🌙';
+    });
+    
+    // قائمة الجوال
+    const mobileMenuButton = document.querySelector('.mobile-menu-button');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    
+    function toggleMobileButton() {
+      if (window.innerWidth <= 768) {
+        mobileMenuButton.classList.remove('hidden');
+      } else {
+        mobileMenuButton.classList.add('hidden');
+        mobileMenu.classList.remove('active');
+      }
+    }
+    
+    window.addEventListener('load', toggleMobileButton);
+    window.addEventListener('resize', toggleMobileButton);
+    
+    mobileMenuButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('active');
+    });
+    
+    document.querySelectorAll('.mobile-menu .nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.remove('active');
+      });
+    });
+  </script>
+</body>
+</html>
