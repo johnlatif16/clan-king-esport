@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const sqlite3 = require('sqlite3').verbose();
 const { v4: uuidv4 } = require('uuid');
+const axios = require('axios');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -75,6 +76,7 @@ db.serialize(() => {
       playerPhone TEXT NOT NULL,
       playerName TEXT,
       fileUrl TEXT NOT NULL,
+      type TEXT DEFAULT 'booking',
       uploadedAt DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -120,6 +122,28 @@ const transporter = nodemailer.createTransport({
     pass: process.env.SMTP_PASS
   }
 });
+
+// دالة لإرسال إشعارات التيليجرام
+async function sendTelegramNotification(message) {
+  try {
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+    
+    if (!token || !chatId) {
+      console.warn('Telegram bot token or chat ID not configured');
+      return;
+    }
+
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
+    await axios.post(url, {
+      chat_id: chatId,
+      text: message,
+      parse_mode: 'HTML'
+    });
+  } catch (error) {
+    console.error('Error sending Telegram notification:', error.message);
+  }
+}
 
 // تكوين الجلسات مع SQLite Store
 const SQLiteStore = require('connect-sqlite3')(session);
@@ -181,6 +205,19 @@ app.post('/api/booking', upload.single('bGameVideo'), async (req, res) => {
           console.error('Error saving booking:', err);
           return res.status(500).json({ success: false, message: 'حدث خطأ أثناء تقديم الطلب' });
         }
+
+        // إرسال إشعار التيليجرام
+        const telegramMsg = `
+          🚀 <b>طلب انضمام جديد</b> 🚀
+          👤 الاسم: <b>${bName}</b>
+          📧 الإيميل: <b>${bEmail}</b>
+          📞 الهاتف: <b>${bPhone}</b>
+          ⏳ المدة: <b>${bDuration}</b>
+          🎮 العمر: <b>${bAge}</b>
+          🔗 الرابط: https://clan-king-esport-production.up.railway.app/admin/dashboard
+        `;
+        sendTelegramNotification(telegramMsg);
+
         res.json({ success: true, message: 'تم تقديم طلب الانضمام بنجاح', bookingId: id });
       }
     );
@@ -229,6 +266,18 @@ app.post('/api/contact', async (req, res) => {
             message: 'حدث خطأ أثناء إرسال الاستفسار' 
           });
         }
+
+        // إرسال إشعار التيليجرام للاستفسار الجديد
+        const telegramMsg = `
+          📩 <b>استفسار جديد</b> 📩
+          👤 الاسم: <b>${name}</b>
+          📧 الإيميل: <b>${email}</b>
+          📞 الهاتف: <b>${phone}</b>
+          📝 الرسالة: <b>${message.substring(0, 100)}${message.length > 100 ? '...' : ''}</b>
+          🔗 الرابط: https://clan-king-esport-production.up.railway.app/admin/dashboard
+        `;
+        sendTelegramNotification(telegramMsg);
+
         res.json({ 
           success: true, 
           message: 'تم إرسال استفسارك بنجاح' 
@@ -268,6 +317,12 @@ app.get('/admin/data', isAdminAuthenticated, (req, res) => {
             console.error('Error fetching results:', err);
             return res.status(500).json({ success: false });
           }
+
+          console.log('Sending data to admin:', {
+            bookings: bookings.length,
+            inquiries: inquiries.length,
+            results: results.length
+          });
 
           res.json({
             bookings: bookings,
@@ -331,22 +386,6 @@ app.post('/admin/update-booking/:id', isAdminAuthenticated, async (req, res) => 
         if (err) {
           console.error('Error updating booking:', err);
           return res.json({ success: false, message: 'الطلب غير موجود' });
-        }
-
-        if (this.changes > 0 && status === 'approved') {
-          db.get(
-            `SELECT phone, name FROM bookings WHERE id = ?`,
-            [id],
-            (err, booking) => {
-              if (err || !booking) return;
-
-              db.run(
-                `INSERT INTO results (id, playerPhone, playerName, fileUrl) 
-                 VALUES (?, ?, ?, ?)`,
-                [uuidv4(), booking.phone, booking.name, '']
-              );
-            }
-          );
         }
 
         res.json({ success: true });
@@ -442,20 +481,21 @@ app.delete('/admin/delete-inquiry/:id', isAdminAuthenticated, async (req, res) =
 
 app.post('/admin/send-message', isAdminAuthenticated, async (req, res) => {
   try {
-    const { email, message, senderName = "STORE King个ESPORTSツ" } = req.body;
+    const { email, message, senderName = "Clan King个ESPORTSツ" } = req.body;
 
     transporter.sendMail({
       from: `"${senderName}" <${process.env.SMTP_USER}>`,
       to: email,
-      subject: 'رسالة من إدارة STORE King个ESPORTSツ',
+      subject: 'رسالة من كلان  King个ESPORTSツ',
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #4f46e5;">رسالة من إدارة STORE King个ESPORTSツ</h2>
+          <h2 style="color: #4f46e5;">رسالة من Clan King个ESPORTSツ</h2>
           <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin-top: 20px;">
             ${message.replace(/\n/g, '<br>')}
           </div>
           <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
-            هذه الرسالة مرسلة من نظام STORE King个ESPORTSツ - لا ترد على هذا البريد
+            هذه الرسالة مرسلة من نظام Clan King个ESPORTSツ - لا ترد على هذا البريد
+            اذا احتجت الرد ابعت رسالتك هناhttps://clan-king-esport-production.up.railway.app/#inquiries
           </p>
         </div>
       `
@@ -470,7 +510,7 @@ app.post('/admin/send-message', isAdminAuthenticated, async (req, res) => {
 
 app.post('/admin/upload-result', isAdminAuthenticated, upload.single('resultFile'), async (req, res) => {
   try {
-    const { playerPhone, playerName = 'غير معروف' } = req.body;
+    const { playerPhone, playerName = 'غير معروف', type = 'booking' } = req.body;
     
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'لم يتم اختيار ملف' });
@@ -479,9 +519,9 @@ app.post('/admin/upload-result', isAdminAuthenticated, upload.single('resultFile
     const fileUrl = '/uploads/' + req.file.filename;
 
     db.run(
-      `INSERT INTO results (id, playerPhone, playerName, fileUrl) 
-       VALUES (?, ?, ?, ?)`,
-      [uuidv4(), playerPhone, playerName, fileUrl],
+      `INSERT INTO results (id, playerPhone, playerName, fileUrl, type) 
+       VALUES (?, ?, ?, ?, ?)`,
+      [uuidv4(), playerPhone, playerName, fileUrl, type],
       function(err) {
         if (err) {
           console.error('Error uploading result:', err);
@@ -504,6 +544,14 @@ app.post('/admin/upload-result', isAdminAuthenticated, upload.single('resultFile
 app.post('/admin/update-result', isAdminAuthenticated, upload.single('editResultFile'), async (req, res) => {
   try {
     const { id, playerPhone, playerName } = req.body;
+    
+    if (!id || !playerPhone) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'معرّف النتيجة ورقم الهاتف مطلوبان' 
+      });
+    }
+
     const fileUrl = req.file ? '/uploads/' + req.file.filename : null;
 
     // الحصول على معلومات النتيجة الحالية
@@ -511,15 +559,30 @@ app.post('/admin/update-result', isAdminAuthenticated, upload.single('editResult
       `SELECT fileUrl FROM results WHERE id = ?`,
       [id],
       (err, result) => {
-        if (err || !result) {
-          return res.status(404).json({ success: false, message: 'النتيجة غير موجودة' });
+        if (err) {
+          console.error('Database error:', err);
+          return res.status(500).json({ 
+            success: false, 
+            message: 'خطأ في قاعدة البيانات' 
+          });
+        }
+        
+        if (!result) {
+          return res.status(404).json({ 
+            success: false, 
+            message: 'النتيجة غير موجودة' 
+          });
         }
 
         // إذا تم رفع ملف جديد، احذف الملف القديم
         if (req.file && result.fileUrl) {
           const oldFilePath = path.join(__dirname, 'public', result.fileUrl);
           if (fs.existsSync(oldFilePath)) {
-            fs.unlinkSync(oldFilePath);
+            try {
+              fs.unlinkSync(oldFilePath);
+            } catch (fileError) {
+              console.error('Error deleting old file:', fileError);
+            }
           }
         }
 
@@ -527,12 +590,16 @@ app.post('/admin/update-result', isAdminAuthenticated, upload.single('editResult
 
         db.run(
           `UPDATE results SET playerPhone = ?, playerName = ?, fileUrl = ? WHERE id = ?`,
-          [playerPhone, playerName, finalFileUrl, id],
+          [playerPhone, playerName || null, finalFileUrl, id],
           function(err) {
             if (err) {
-              console.error('Error updating result:', err);
-              return res.status(500).json({ success: false, message: 'حدث خطأ أثناء تحديث النتيجة' });
+              console.error('Update error:', err);
+              return res.status(500).json({ 
+                success: false, 
+                message: 'فشل تحديث النتيجة في قاعدة البيانات' 
+              });
             }
+
             res.json({ 
               success: true, 
               message: 'تم تحديث النتيجة بنجاح',
@@ -544,7 +611,10 @@ app.post('/admin/update-result', isAdminAuthenticated, upload.single('editResult
     );
   } catch (error) {
     console.error('Error updating result:', error);
-    res.status(500).json({ success: false, message: 'حدث خطأ أثناء تحديث النتيجة' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'حدث خطأ غير متوقع أثناء تحديث النتيجة' 
+    });
   }
 });
 
