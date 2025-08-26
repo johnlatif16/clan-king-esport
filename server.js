@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 const sqlite3 = require('sqlite3').verbose();
 const { v4: uuidv4 } = require('uuid');
-const axios = require('axios');
+const axios = require('axios'); // لإرسال طلبات التيليجرام
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -123,28 +123,6 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// دالة لإرسال إشعارات التيليجرام
-async function sendTelegramNotification(message) {
-  try {
-    const token = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
-    
-    if (!token || !chatId) {
-      console.warn('Telegram bot token or chat ID not configured');
-      return;
-    }
-
-    const url = `https://api.telegram.org/bot${token}/sendMessage`;
-    await axios.post(url, {
-      chat_id: chatId,
-      text: message,
-      parse_mode: 'HTML'
-    });
-  } catch (error) {
-    console.error('Error sending Telegram notification:', error.message);
-  }
-}
-
 // تكوين الجلسات مع SQLite Store
 const SQLiteStore = require('connect-sqlite3')(session);
 const sessionConfig = {
@@ -188,6 +166,48 @@ const isAdminAuthenticated = (req, res, next) => {
   return res.status(401).json({ loggedIn: false });
 };
 
+// دالة لإرسال إشعار التيليجرام
+const sendTelegramNotification = async (message) => {
+  try {
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+    
+    if (!botToken || !chatId) {
+      console.warn('Telegram bot token or chat ID not configured');
+      return;
+    }
+
+    const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+    
+    await axios.post(url, {
+      chat_id: chatId,
+      text: message,
+      parse_mode: 'HTML'
+    });
+    
+    console.log('Telegram notification sent successfully');
+  } catch (error) {
+    console.error('Error sending Telegram notification:', error.message);
+  }
+};
+
+// دالة لإرسال إشعار الجيميل
+const sendEmailNotification = async (subject, htmlContent) => {
+  try {
+    const mailOptions = {
+      from: `"Clan King ESPORTS" <${process.env.SMTP_USER}>`,
+      to: process.env.NOTIFICATION_EMAIL,
+      subject: subject,
+      html: htmlContent
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Email notification sent successfully');
+  } catch (error) {
+    console.error('Error sending email notification:', error);
+  }
+};
+
 // Routes للواجهة الأمامية
 app.post('/api/booking', upload.single('bGameVideo'), async (req, res) => {
   try {
@@ -207,16 +227,35 @@ app.post('/api/booking', upload.single('bGameVideo'), async (req, res) => {
         }
 
         // إرسال إشعار التيليجرام
-        const telegramMsg = `
-          🚀 <b>طلب انضمام جديد</b> 🚀
-          👤 الاسم: <b>${bName}</b>
-          📧 الإيميل: <b>${bEmail}</b>
-          📞 الهاتف: <b>${bPhone}</b>
-          ⏳ المدة: <b>${bDuration}</b>
-          🎮 العمر: <b>${bAge}</b>
-          🔗 الرابط: https://clan-king-esport-production.up.railway.app/admin/dashboard
+        const telegramMessage = `
+          <b>🎮 طلب انضمام جديد 🎮</b>
+          <b>الاسم:</b> ${bName}
+          <b>البريد:</b> ${bEmail}
+          <b>الهاتف:</b> ${bPhone}
+          <b>الفريمات:</b> ${bDuration}
+          <b>السن:</b> ${bAge}
+          <b>رابط لوحة التحكم:</b> ${process.env.ADMIN_PANEL_URL}
         `;
-        sendTelegramNotification(telegramMsg);
+        sendTelegramNotification(telegramMessage);
+
+        // إرسال إشعار الجيميل
+        const emailSubject = `طلب انضمام جديد من ${bName}`;
+        const emailContent = `
+          <div dir="rtl" style="font-family: Arial, sans-serif;">
+            <h2 style="color: #4f46e5;">طلب انضمام جديد</h2>
+            <p><strong>الاسم:</strong> ${bName}</p>
+            <p><strong>البريد الإلكتروني:</strong> ${bEmail}</p>
+            <p><strong>رقم الهاتف:</strong> ${bPhone}</p>
+            <p><strong>الفريمات:</strong> ${bDuration}</p>
+            <p><strong>العمر:</strong> ${bAge}</p>
+            <p style="margin-top: 20px;">
+              <a href="${process.env.ADMIN_PANEL_URL}" style="background-color: #4f46e5; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">
+                الانتقال إلى لوحة التحكم
+              </a>
+            </p>
+          </div>
+        `;
+        sendEmailNotification(emailSubject, emailContent);
 
         res.json({ success: true, message: 'تم تقديم طلب الانضمام بنجاح', bookingId: id });
       }
@@ -267,16 +306,37 @@ app.post('/api/contact', async (req, res) => {
           });
         }
 
-        // إرسال إشعار التيليجرام للاستفسار الجديد
-        const telegramMsg = `
-          📩 <b>استفسار جديد</b> 📩
-          👤 الاسم: <b>${name}</b>
-          📧 الإيميل: <b>${email}</b>
-          📞 الهاتف: <b>${phone}</b>
-          📝 الرسالة: <b>${message.substring(0, 100)}${message.length > 100 ? '...' : ''}</b>
-          🔗 الرابط: https://clan-king-esport-production.up.railway.app/admin/dashboard
+        // إرسال إشعار التيليجرام
+        const telegramMessage = `
+          <b>📩 استفسار جديد 📩</b>
+          <b>الاسم:</b> ${name}
+          <b>البريد:</b> ${email}
+          <b>الهاتف:</b> ${phone}
+          <b>الرسالة:</b> ${message}
+          <b>رابط لوحة التحكم:</b> ${process.env.ADMIN_PANEL_URL}
         `;
-        sendTelegramNotification(telegramMsg);
+        sendTelegramNotification(telegramMessage);
+
+        // إرسال إشعار الجيميل
+        const emailSubject = `استفسار جديد من ${name}`;
+        const emailContent = `
+          <div dir="rtl" style="font-family: Arial, sans-serif;">
+            <h2 style="color: #4f46e5;">استفسار جديد</h2>
+            <p><strong>الاسم:</strong> ${name}</p>
+            <p><strong>البريد الإلكتروني:</strong> ${email}</p>
+            <p><strong>رقم الهاتف:</strong> ${phone}</p>
+            <p><strong>الرسالة:</strong></p>
+            <div style="background-color: #f3f4f6; padding: 10px; border-radius: 5px;">
+              ${message.replace(/\n/g, '<br>')}
+            </div>
+            <p style="margin-top: 20px;">
+              <a href="${process.env.ADMIN_PANEL_URL}" style="background-color: #4f46e5; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">
+                الانتقال إلى لوحة التحكم
+              </a>
+            </p>
+          </div>
+        `;
+        sendEmailNotification(emailSubject, emailContent);
 
         res.json({ 
           success: true, 
@@ -317,12 +377,6 @@ app.get('/admin/data', isAdminAuthenticated, (req, res) => {
             console.error('Error fetching results:', err);
             return res.status(500).json({ success: false });
           }
-
-          console.log('Sending data to admin:', {
-            bookings: bookings.length,
-            inquiries: inquiries.length,
-            results: results.length
-          });
 
           res.json({
             bookings: bookings,
@@ -387,7 +441,6 @@ app.post('/admin/update-booking/:id', isAdminAuthenticated, async (req, res) => 
           console.error('Error updating booking:', err);
           return res.json({ success: false, message: 'الطلب غير موجود' });
         }
-
         res.json({ success: true });
       }
     );
@@ -409,7 +462,6 @@ app.delete('/admin/delete-booking/:id', isAdminAuthenticated, async (req, res) =
           return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
         }
 
-        // حذف ملف الفيديو إذا كان موجودًا
         if (booking.gameVideo) {
           const filePath = path.join(__dirname, 'public', booking.gameVideo);
           if (fs.existsSync(filePath)) {
@@ -481,21 +533,21 @@ app.delete('/admin/delete-inquiry/:id', isAdminAuthenticated, async (req, res) =
 
 app.post('/admin/send-message', isAdminAuthenticated, async (req, res) => {
   try {
-    const { email, message, senderName = "Clan King个ESPORTSツ" } = req.body;
+    const { email, message, senderName = "Clan King ESPORTS" } = req.body;
 
     transporter.sendMail({
       from: `"${senderName}" <${process.env.SMTP_USER}>`,
       to: email,
-      subject: 'رسالة من كلان  King个ESPORTSツ',
+      subject: 'رسالة من كلان King ESPORTS',
       html: `
         <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #4f46e5;">رسالة من Clan King个ESPORTSツ</h2>
+          <h2 style="color: #4f46e5;">رسالة من Clan King ESPORTS</h2>
           <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin-top: 20px;">
             ${message.replace(/\n/g, '<br>')}
           </div>
           <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
-            هذه الرسالة مرسلة من نظام Clan King个ESPORTSツ - لا ترد على هذا البريد
-            اذا احتجت الرد ابعت رسالتك هناhttps://clan-king-esport-production.up.railway.app/#inquiries
+            هذه الرسالة مرسلة من نظام Clan King ESPORTS - لا ترد على هذا البريد
+            اذا احتجت الرد ابعت رسالتك هنا ${process.env.FRONTEND_URL}/#inquiries
           </p>
         </div>
       `
@@ -554,7 +606,6 @@ app.post('/admin/update-result', isAdminAuthenticated, upload.single('editResult
 
     const fileUrl = req.file ? '/uploads/' + req.file.filename : null;
 
-    // الحصول على معلومات النتيجة الحالية
     db.get(
       `SELECT fileUrl FROM results WHERE id = ?`,
       [id],
@@ -574,7 +625,6 @@ app.post('/admin/update-result', isAdminAuthenticated, upload.single('editResult
           });
         }
 
-        // إذا تم رفع ملف جديد، احذف الملف القديم
         if (req.file && result.fileUrl) {
           const oldFilePath = path.join(__dirname, 'public', result.fileUrl);
           if (fs.existsSync(oldFilePath)) {

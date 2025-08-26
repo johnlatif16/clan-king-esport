@@ -2,7 +2,12 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@railway/app-node"
+      "use": "@railway/app-node",
+      "config": {
+        "installCommand": "npm install",
+        "buildCommand": "npm run build",
+        "startCommand": "npm start"
+      }
     }
   ],
   "volumes": {
